@@ -63,4 +63,5 @@ runs:
         PURPLE: \033[1;35m
         CYAN: \033[1;36m
         BLANK: \033[0m
-        FORCE_COLOR: 2
+        PY_COLORS: 1
+        #FORCE_COLOR: 2
