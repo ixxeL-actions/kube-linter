@@ -1,65 +1,66 @@
-name: 'Kube-linter'
-description: 'Static analysis tool that checks Kubernetes YAML files and Helm charts.'
-author: 'ixxeL'
+---
+name: Kube-linter
+description: Static analysis tool that checks Kubernetes YAML files and Helm charts.
+author: ixxeL
 inputs:
   format:
-    description: 'Format result. [json, sarif, plain]'
+    description: Format result. [json, sarif, plain]
     required: false
-    default: 'plain'
+    default: plain
   all-builtin:
-    description: 'if set, adds all built-in checks.'
+    description: if set, adds all built-in checks.
     required: false
     default: 'false'
   exit-zero:
-    description: 'Force exit 0 code'
+    description: Force exit 0 code
     required: false
-    default: 'true'      
+    default: 'true'
   working-dir:
-    description: 'directory in which to find the Dockerfile'
+    description: directory in which to find the Dockerfile
     required: false
-    default: '.'
+    default: .
 
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - id: kube-linter
-      run: |
-        set +e
-        echo -e "${BLUE}[ STEP - IaC security scan ] > IaC code security scan with Kube-linter.${BLANK}"
-        echo -e "${CYAN}[ INFO ] > Kube-linter version.${BLANK}"
-        kube-linter version
+  - id: kube-linter
+    run: |
+      set +e
+      echo -e "${BLUE}[ STEP - IaC security scan ] > IaC code security scan with Kube-linter.${BLANK}"
+      echo -e "${CYAN}[ INFO ] > Kube-linter version.${BLANK}"
+      kube-linter version
 
-        echo -e "${YELLOW}[ EXECUTING ] > Executing Kube-linter IaC test on ${{ inputs.working-dir }}.${BLANK}"
-        if [[ "${{ inputs.all-builtin }}" = "true" ]]
-        then
-          BUILTIN="--add-all-built-in"
-        else
-          BUILTIN=""
-        fi
+      echo -e "${YELLOW}[ EXECUTING ] > Executing Kube-linter IaC test on ${{ inputs.working-dir }}.${BLANK}"
+      if [[ "${{ inputs.all-builtin }}" = "true" ]]
+      then
+        BUILTIN="--add-all-built-in"
+      else
+        BUILTIN=""
+      fi
 
-        if [[ "${{ inputs.format }}" = "json" || "${{ inputs.format }}" = "sarif" ]]
-        then
-          echo -e "${CYAN}[ INFO ] > Using JSON/SARIF format.${BLANK}"
-          kube-linter lint --format=${{ inputs.format }} ${BUILTIN} ${{ inputs.working-dir }} | jq -C
-        else
-          echo -e "${CYAN}[ INFO ] > Using PLAIN format.${BLANK}"
-          kube-linter lint --format=${{ inputs.format }} ${BUILTIN} ${{ inputs.working-dir }}
-        fi
+      if [[ "${{ inputs.format }}" = "json" || "${{ inputs.format }}" = "sarif" ]]
+      then
+        echo -e "${CYAN}[ INFO ] > Using JSON/SARIF format.${BLANK}"
+        kube-linter lint --format=${{ inputs.format }} ${BUILTIN} ${{ inputs.working-dir }} | jq -C
+      else
+        echo -e "${CYAN}[ INFO ] > Using PLAIN format.${BLANK}"
+        kube-linter lint --format=${{ inputs.format }} ${BUILTIN} ${{ inputs.working-dir }}
+      fi
 
-        EXIT_CODE="${PIPESTATUS[0]}"
-        if [[ ${EXIT_CODE} -ne 0 && ${{ inputs.exit-zero }} != true ]]
-        then
-          echo -e "${RED}[ FAIL ] > Kube-linter IaC scan failed.${BLANK}"
-          exit ${EXIT_CODE}
-        else
-          echo -e "${GREEN}[ SUCCESS ] > Kube-linter IaC scan succeeded.${BLANK}"
-        fi
-      shell: 'script --return --quiet --command "bash {0}"'
-      env:
-        RED: \033[1;31m
-        GREEN: \033[1;32m
-        YELLOW: \033[1;33m
-        BLUE: \033[1;34m
-        PURPLE: \033[1;35m
-        CYAN: \033[1;36m
-        BLANK: \033[0m
+      EXIT_CODE="${PIPESTATUS[0]}"
+      if [[ ${EXIT_CODE} -ne 0 && ${{ inputs.exit-zero }} != true ]]
+      then
+        echo -e "${RED}[ FAIL ] > Kube-linter IaC scan failed.${BLANK}"
+        exit ${EXIT_CODE}
+      else
+        echo -e "${GREEN}[ SUCCESS ] > Kube-linter IaC scan succeeded.${BLANK}"
+      fi
+    shell: script --return --quiet --command "bash {0}"
+    env:
+      RED: \033[1;31m
+      GREEN: \033[1;32m
+      YELLOW: \033[1;33m
+      BLUE: \033[1;34m
+      PURPLE: \033[1;35m
+      CYAN: \033[1;36m
+      BLANK: \033[0m
